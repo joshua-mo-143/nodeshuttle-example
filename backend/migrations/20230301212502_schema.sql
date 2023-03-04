@@ -12,3 +12,5 @@ CREATE TABLE IF NOT EXISTS notes (
     owner VARCHAR NOT NULL,
     createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 );
+
+INSERT INTO notes (message, owner) VALUES ('Hello world!', 'he');

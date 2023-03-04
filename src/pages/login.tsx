@@ -16,14 +16,13 @@ export default function Home() {
     e.preventDefault()
 
     try {
-      await fetch(`http://localhost:9999/api/login`, 
+      await fetch(`http://${window.location.host}/api/auth/login`, 
         {
           method: "POST",
           mode: "cors",
           headers: {
             "Content-Type": "application/json",
           },
-          redirect: "follow",
           body: JSON.stringify({
             username: username,
             password: password

@@ -30,6 +30,9 @@ async fn axum(
     #[shuttle_shared_db::Postgres] postgres: PgPool,
     #[shuttle_secrets::Secrets] secrets: SecretStore,
 ) -> shuttle_service::ShuttleAxum {
+
+    sqlx::migrate!().run(&postgres).await;
+    
     let smtp_email = secrets
         .get("SMTP_EMAIL")
         .expect("You need to set your SMTP_EMAIL secret!");

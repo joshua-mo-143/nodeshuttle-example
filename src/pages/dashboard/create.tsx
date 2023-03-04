@@ -35,23 +35,18 @@ export default function Home() {
     const fetchData = async () => {
 
       try {
-        const res = await fetch(`http://${window.location.host}/api/notes`,
-        {
-            method: "GET",
-            credentials: "include",
-            mode: "cors",
-            headers: new Headers({
-              "Access-Control-Allow-Credentials": "true"
-            }),
-          });
+        const res = await fetch(`http://${window.location.host}/api/notes`);
 
+        if (res.status == 403) {
+          router.push("/");
+          return
+        }
         const data: record[] = await res.json()
 
         setData(data);
 
       } catch (e: any) {
         console.log(`Error: ${e}`);
-
       }
     };
     fetchData()

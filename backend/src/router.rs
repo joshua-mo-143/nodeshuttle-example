@@ -6,7 +6,8 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use axum_extra::extract::cookie::{Cookie, PrivateCookieJar};
+use axum_extra::extract::cookie::{Cookie, PrivateCookieJar, SameSite};
+use http::{HeaderValue, header::{AUTHORIZATION, ACCEPT, ORIGIN}, Method};
 use lettre::message::header::ContentType;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
@@ -14,7 +15,8 @@ use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use std::path::PathBuf;
-use tower_http::cors::CorsLayer;
+use time::Duration;
+use tower_http::cors::{Any, CorsLayer};
 
 use axum_extra::routing::SpaRouter;
 
@@ -27,6 +29,11 @@ pub struct LoginDetails {
 }
 
 pub fn api_router(state: AppState) -> Router {
+    let cors = CorsLayer::new()
+        .allow_credentials(true)
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_headers([ORIGIN, AUTHORIZATION, ACCEPT])
+        .allow_origin("http://127.0.0.1:9999".parse::<HeaderValue>().unwrap());
     let notes_router = Router::new()
         .route("/", get(view_records))
         .route("/create", post(create_record))
@@ -50,12 +57,15 @@ pub fn api_router(state: AppState) -> Router {
         .nest("/notes", notes_router)
         .nest("/auth", auth_router)
         .with_state(state)
+        .layer(cors)
 }
 
 pub fn create_router(static_folder: PathBuf, state: AppState) -> Router {
-    api_router(state)
+    let api_router = api_router(state);
+
+    Router::new()
+        .nest("/api", api_router)
         .merge(SpaRouter::new("/", static_folder).index_file("index.html"))
-        .layer(CorsLayer::permissive())
 }
 
 pub async fn health_check() -> Response {
@@ -65,8 +75,9 @@ pub async fn health_check() -> Response {
 pub async fn register(
     State(state): State<AppState>,
     Json(newuser): Json<LoginDetails>,
-) -> impl IntoResponse {
-    let hashed_password = bcrypt::hash(newuser.password, 10).unwrap();
+) -> impl IntoResponse {  
+    
+     let hashed_password = bcrypt::hash(newuser.password, 10).unwrap();
 
     let query = sqlx::query("INSERT INTO users (username, password) values ($1, $2)")
         .bind(newuser.username)
@@ -87,9 +98,9 @@ pub async fn login(
     State(mut state): State<AppState>,
     jar: PrivateCookieJar,
     Json(login): Json<LoginDetails>,
-) -> (PrivateCookieJar, Response) {
+) -> Result<(PrivateCookieJar, StatusCode), StatusCode> {
     if jar.get("foo").is_some() {
-        return (jar, (StatusCode::OK, "Already logged in!").into_response());
+        return Ok((jar, StatusCode::OK));
     }
 
     let query = sqlx::query("SELECT * FROM users WHERE username = $1")
@@ -99,36 +110,30 @@ pub async fn login(
     match query.await {
         Ok(res) => {
             if bcrypt::verify(login.password, res.unwrap().get("password")).is_err() {
-                return (
-                    jar,
-                    (
-                        StatusCode::BAD_REQUEST,
-                        "Incorrect credentials, please try again.".to_string(),
-                    )
-                        .into_response(),
-                );
+                return Err(StatusCode::BAD_REQUEST);
             }
 
-            let random_number = rand::random::<u64>().to_string();
+            let session_id = rand::random::<u64>().to_string();
 
-            state
-                .cookielist
-                .insert(random_number.clone(), login.username);
+            println!("Session id is: {session_id}");
 
-            (
-                jar.add(Cookie::new("foo", random_number)),
-                (StatusCode::OK, "Logged in!".to_string()).into_response(),
-            )
+            state.cookielist.insert(session_id.clone(), login.username);
+
+            println!("{:?}", state.cookielist);
+
+            let cookie = Cookie::build("foo", session_id)
+                .secure(true)
+                .same_site(SameSite::Strict)
+                .http_only(true)
+                .path("/")
+                .max_age(Duration::WEEK)
+                .finish();
+
+            Ok((jar.add(cookie), StatusCode::OK))
+
         }
 
-        Err(_) => (
-            jar,
-            (
-                StatusCode::BAD_REQUEST,
-                "Incorrect login details, please try again.".to_string(),
-            )
-                .into_response(),
-        ),
+        Err(_) => Err(StatusCode::BAD_REQUEST),
     }
 }
 
@@ -178,12 +183,18 @@ pub async fn validate_session<B>(
     next: Next<B>,
 ) -> (PrivateCookieJar, Response) {
     let Some(cookie) = jar.get("foo").map(|cookie| cookie.value().to_owned()) else {
+
+        println!("Couldn't find a cookie in the jar");
         return (jar,(StatusCode::FORBIDDEN, "Forbidden!".to_string()).into_response())
     };
-
+    
+    println!("Value is {cookie}");
+    
     if state.cookielist.contains_key(&cookie) {
+        println!("Cookie found");
         (jar, next.run(request).await)
     } else {
+        println!("Cookie value doesn't match hashmap key :(");
         (
             jar.remove(Cookie::named("foo")),
             (StatusCode::FORBIDDEN, "Forbidden!").into_response(),

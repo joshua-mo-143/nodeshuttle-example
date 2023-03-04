@@ -26,14 +26,13 @@ export default function Home() {
     }
 
     try {
-      await fetch(`http://${window.location.host}/api/register`, 
+      await fetch(`http://${window.location.host}/api/auth/register`, 
         {
           method: "POST",
           mode: "cors",
           headers: {
             "Content-Type": "application/json",
           },
-          redirect: "follow",
           body: JSON.stringify({
             username: username,
             password: password

@@ -1902,6 +1902,7 @@ dependencies = [
  "axum-extra",
  "axum-macros",
  "bcrypt",
+ "http",
  "lettre",
  "rand",
  "serde",
@@ -1911,6 +1912,7 @@ dependencies = [
  "shuttle-static-folder",
  "sqlx",
  "sync_wrapper",
+ "time 0.3.20",
  "tower-http 0.4.0",
 ]
 
