@@ -160,18 +160,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-macros"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fbf955307ff8addb48d2399393c9e2740dd491537ec562b66ab364fc4a38841"
-dependencies = [
- "heck",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -520,9 +508,6 @@ name = "either"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fcaabb2fef8c910e7f4c7ce9f67a1283a1715879a7c230ca9d6d1ae31f16d91"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "email-encoding"
@@ -1869,12 +1854,9 @@ dependencies = [
  "dotenvy",
  "either",
  "heck",
- "hex",
  "once_cell",
  "proc-macro2",
  "quote",
- "serde",
- "serde_json",
  "sha2",
  "sqlx-core",
  "sqlx-rt",
@@ -1895,12 +1877,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "static-next-server-00000000-0000-0000-0000-000000000000"
+name = "static-next-server"
 version = "0.1.0"
 dependencies = [
  "axum",
  "axum-extra",
- "axum-macros",
  "bcrypt",
  "http",
  "lettre",

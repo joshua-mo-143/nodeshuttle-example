@@ -16,6 +16,7 @@ pub struct AppState {
     key: Key,
     smtp_email: String,
     smtp_password: String,
+    domain: String,
 }
 
 impl FromRef<AppState> for Key {
@@ -30,9 +31,11 @@ async fn axum(
     #[shuttle_shared_db::Postgres] postgres: PgPool,
     #[shuttle_secrets::Secrets] secrets: SecretStore,
 ) -> shuttle_service::ShuttleAxum {
+    sqlx::migrate!()
+        .run(&postgres)
+        .await
+        .expect("Something went wrong with migrating :(");
 
-    sqlx::migrate!().run(&postgres).await;
-    
     let smtp_email = secrets
         .get("SMTP_EMAIL")
         .expect("You need to set your SMTP_EMAIL secret!");
@@ -41,12 +44,17 @@ async fn axum(
         .get("SMTP_PASSWORD")
         .expect("You need to set your SMTP_PASSWORD secret!");
 
+    let domain = secrets
+        .get("DOMAIN")
+        .expect("You need to set your DOMAIN secret!");
+
     let state = AppState {
         postgres,
         cookielist: HashMap::new(),
         key: Key::generate(),
         smtp_email,
         smtp_password,
+        domain,
     };
 
     let router = create_router(static_folder, state);

@@ -5,19 +5,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
 
-const inter = Inter({ subsets: ['latin'] })
-
-type record = {
-  id: number,
-  message: string,
-  owner: string
-}
-
 export default function Home() {
 
   let router = useRouter();
 
-  let [data, setData] = React.useState<record[]>([]);
+  let [message, setMessage] = React.useState<string>("");
 
   const handleLogout = async (e: React.SyntheticEvent) => {
     e.preventDefault()
@@ -27,31 +19,29 @@ export default function Home() {
     if (res.ok) {
       router.push("/");
     }
-
   }
 
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault()
+    try {
+    const res = await fetch(`http://${window.location.host}/api/notes/create`, {
+      mode: 'cors',
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      }, 
+      body: JSON.stringify({
+        message: message
+      })
+    })
 
-  React.useEffect(() => {
-    const fetchData = async () => {
+      router.push("/dashboard")
 
-      try {
-        const res = await fetch(`http://${window.location.host}/api/notes`);
-
-        if (res.status == 403) {
-          router.push("/");
-          return
-        }
-        const data: record[] = await res.json()
-
-        setData(data);
-
-      } catch (e: any) {
-        console.log(`Error: ${e}`);
-      }
-    };
-    fetchData()
-  }, []);
-
+    } catch (e: any) {
+      console.log(`Error: ${e}`)
+    }
+  }
+  
   return (
     <>
       <Head>
@@ -75,35 +65,16 @@ export default function Home() {
         <div className="bg-stone-200 shadow-md mt-10 w-[100%-2rem] md:w-4/5 min-h-[20rem] rounded-md bg-sky-300 px-10 flex flex-col items-center">
           <h1 className="mt-5 text-xl lg:text-2xl">Dashboard</h1>
 
-          { data.length > 0 ? 
-
-          <table>
-            <thead>
-            <tr>
-              <th>Note ID</th>
-              <th>Note Message</th>
-              <th>Owner</th>
-        <th>Edit</th>
-      <th>Delete</th>
-      </tr >
-        </thead>
-  
-      {data.map((record: record) => (
-        <tr>
-          <td>{record.id}</td>
-          <td>{record.message}</td>
-          <td>{record.owner}</td>
-          <td><button>Edit</button></td>
-          <td><button>Delete</button></td>
-        </tr>
-      ))}
-    
-          </table >
-          
-           : <p> There's no notes here :( Maybe try creating one? </p> }
-    
+          <form onSubmit={handleSubmit} className="flex flex-cols justify-center items-center">
+                       <label htmlFor="message" className="flex flex-row gap-4 items-center justify-center">
+              
+ <span>Enter your message here: </span>
+              <input name="message" className="px-5 py-2" type="text" value={message} onChange={(e) => setMessage((e.target as HTMLInputElement).value)}></input>
+           </label>
+         <button type="submit" className="px-5 py-2 bg-stone-200 hover:bg-stone-100 transition-all">Submit</button>
+            </form>
     </div >
-              </main >
+   </main >
   </>
     
   )

@@ -7,7 +7,6 @@ publish = false
 [dependencies]
 axum = "0.6.1"
 axum-extra = { version = "0.4.2", features = ["spa", "cookie-private"] }
-axum-macros = "0.3.4"
 bcrypt = "0.13.0"
 http = "0.2.9"
 lettre = "0.10.3"
@@ -17,7 +16,7 @@ shuttle-secrets = "0.11.0"
 shuttle-service = { version = "0.11.0", features = ["web-axum"] }
 shuttle-shared-db = { version = "0.11.0", features = ["postgres"] }
 shuttle-static-folder = "0.11.0"
-sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "postgres", "offline"] }
+sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "postgres"] }
 sync_wrapper = "0.1.1"
 time = "0.3.20"
 tower-http = { version = "0.4.0", features = ["cors"] }

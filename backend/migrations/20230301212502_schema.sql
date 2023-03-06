@@ -1,4 +1,6 @@
 -- Add migration script here
+DROP TABLE IF EXISTS sessions;
+
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR UNIQUE NOT NULL,
@@ -9,8 +11,14 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS notes (
     id SERIAL PRIMARY KEY,
     message VARCHAR NOT NULL,
-    owner VARCHAR NOT NULL,
+    owner VARCHAR,
     createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 );
 
 INSERT INTO notes (message, owner) VALUES ('Hello world!', 'he');
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id SERIAL PRIMARY KEY,
+    session_id VARCHAR NOT NULL UNIQUE,
+    user_id INT NOT NULL UNIQUE
+);
