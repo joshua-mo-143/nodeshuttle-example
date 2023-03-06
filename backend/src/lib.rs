@@ -2,7 +2,6 @@ use axum::extract::FromRef;
 use axum_extra::extract::cookie::Key;
 use shuttle_secrets::SecretStore;
 use sqlx::PgPool;
-use std::collections::HashMap;
 use std::path::PathBuf;
 use sync_wrapper::SyncWrapper;
 
@@ -12,7 +11,6 @@ use router::create_router;
 #[derive(Clone)]
 pub struct AppState {
     postgres: PgPool,
-    cookielist: HashMap<String, String>,
     key: Key,
     smtp_email: String,
     smtp_password: String,
@@ -50,7 +48,6 @@ async fn axum(
 
     let state = AppState {
         postgres,
-        cookielist: HashMap::new(),
         key: Key::generate(),
         smtp_email,
         smtp_password,

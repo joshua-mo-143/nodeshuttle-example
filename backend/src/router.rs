@@ -26,6 +26,13 @@ use axum_extra::routing::SpaRouter;
 use crate::AppState;
 
 #[derive(Deserialize)]
+pub struct RegisterDetails {
+    username: String,
+    email: String,
+    password: String
+}
+
+#[derive(Deserialize)]
 pub struct LoginDetails {
     username: String,
     password: String,
@@ -78,12 +85,13 @@ pub async fn health_check() -> Response {
 
 pub async fn register(
     State(state): State<AppState>,
-    Json(newuser): Json<LoginDetails>,
+    Json(newuser): Json<RegisterDetails>,
 ) -> impl IntoResponse {
     let hashed_password = bcrypt::hash(newuser.password, 10).unwrap();
 
-    let query = sqlx::query("INSERT INTO users (username, password) values ($1, $2)")
+    let query = sqlx::query("INSERT INTO users (username, email, password) values ($1, $2, $3)")
         .bind(newuser.username)
+        .bind(newuser.email)
         .bind(hashed_password)
         .execute(&state.postgres);
 
@@ -98,30 +106,28 @@ pub async fn register(
 }
 
 pub async fn login(
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
     jar: PrivateCookieJar,
     Json(login): Json<LoginDetails>,
 ) -> Result<(PrivateCookieJar, StatusCode), StatusCode> {
     let query = sqlx::query("SELECT * FROM users WHERE username = $1")
         .bind(&login.username)
-        .fetch_optional(&state.postgres);
+        .fetch_one(&state.postgres);
 
     match query.await {
         Ok(res) => {
-            if bcrypt::verify(login.password, res.unwrap().get("password")).is_err() {
+            
+            if bcrypt::verify(login.password, res.get("password")).is_err() {
                 return Err(StatusCode::BAD_REQUEST);
             }
             let session_id = rand::random::<u64>().to_string();
 
-            println!("Session id is: {session_id}");
-
-            state.cookielist.insert(session_id.clone(), login.username);
-
             sqlx::query("INSERT INTO sessions (session_id, user_id) VALUES ($1, 1)")
                 .bind(&session_id)
+                .bind(res.get::<i32, _>("user_id"))
                 .execute(&state.postgres)
                 .await
-                .expect("Couldn't insert session :()");
+                .expect("Couldn't insert session :(");
 
             let cookie = Cookie::build("foo", session_id)
                 .secure(true)
@@ -138,17 +144,20 @@ pub async fn login(
     }
 }
 
-pub async fn logout(State(state): State<AppState>, jar: PrivateCookieJar) -> PrivateCookieJar {
+pub async fn logout(State(state): State<AppState>, jar: PrivateCookieJar) -> Result<PrivateCookieJar, StatusCode> {
     let Some(cookie) = jar.get("foo").map(|cookie| cookie.value().to_owned()) else {
-        return jar
+        return Ok(jar)
     };
 
-    sqlx::query("DELETE FROM sessions WHERE session_id = $1")
+    let query = sqlx::query("DELETE FROM sessions WHERE session_id = $1")
         .bind(cookie)
-        .execute(&state.postgres)
-        .await;
+        .execute(&state.postgres);
 
-    jar.remove(Cookie::named("foo"))
+
+        match query.await {
+        Ok(_) => Ok(jar.remove(Cookie::named("foo"))),
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)        
+    }
 }
 
 pub async fn forgot_password(
@@ -156,6 +165,14 @@ pub async fn forgot_password(
     Json(email_recipient): Json<String>,
 ) -> Response {
     let new_password = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
+
+    let hashed_password = bcrypt::hash(&new_password, 10).unwrap();
+
+    sqlx::query("UPDATE users SET password = $1 WHERE email = $2")
+            .bind(hashed_password)
+            .bind(email_recipient.clone())
+            .execute(&state.postgres)
+            .await;
 
     let credentials = Credentials::new(state.smtp_email, state.smtp_password);
 
@@ -216,8 +233,7 @@ pub struct Note {
 pub async fn view_records(State(state): State<AppState>) -> Json<Vec<Note>> {
     let notes: Vec<Note> = sqlx::query_as("SELECT * FROM notes ")
         .fetch_all(&state.postgres)
-        .await
-        .unwrap();
+        .await.unwrap();
 
     Json(notes)
 }
@@ -234,7 +250,7 @@ pub async fn view_one_record(Path(id): Path<String>, State(state): State<AppStat
 
 #[derive(Deserialize)]
 pub struct RecordRequest {
-    message: String,
+    message: String
 }
 
 pub async fn create_record(
@@ -243,10 +259,9 @@ pub async fn create_record(
 ) -> Response {
     let query = sqlx::query("INSERT INTO notes (message) VALUES ($1)")
         .bind(request.message)
-        .execute(&state.postgres)
-        .await;
+        .execute(&state.postgres);
 
-    match query {
+    match query.await {
         Ok(_) => (StatusCode::CREATED, "Record created!".to_string()).into_response(),
         Err(err) => (
             StatusCode::BAD_REQUEST,
@@ -263,11 +278,10 @@ pub async fn edit_record(
 ) -> Response {
     let query = sqlx::query("UPDATE notes SET message = $1 WHERE id = $2")
         .bind(request.message)
-        .bind(&id)
-        .execute(&state.postgres)
-        .await;
+        .bind(id)
+        .execute(&state.postgres);
 
-    match query {
+    match query.await {
         Ok(_) => (StatusCode::OK, format!("Record {id} edited ")).into_response(),
         Err(err) => (
             StatusCode::BAD_REQUEST,
@@ -279,11 +293,10 @@ pub async fn edit_record(
 
 pub async fn destroy_record(State(state): State<AppState>, Path(id): Path<i32>) -> Response {
     let query = sqlx::query("DELETE FROM notes WHERE id = $1")
-        .bind(&id)
-        .execute(&state.postgres)
-        .await;
+        .bind(id)
+        .execute(&state.postgres);
 
-    match query {
+    match query.await {
         Ok(_) => (StatusCode::OK, "Record deleted".to_string()).into_response(),
         Err(err) => (
             StatusCode::BAD_REQUEST,
