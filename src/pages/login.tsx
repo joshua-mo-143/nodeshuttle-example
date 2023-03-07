@@ -39,7 +39,7 @@ export default function Home() {
   
   return (
     <GuestLayout>
-               <form onSubmit={(e) => handleSubmit(e)} className="">  
+               <form onSubmit={(e) => handleSubmit(e)} className="flex flex-col gap-4">  
               <p className="text-2xl">Log In</p>
               <label htmlFor="username" className="flex flex-row items-center gap-4 w-[20rem]">
                 <span>Username:</span>

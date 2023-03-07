@@ -1877,7 +1877,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "static-next-server"
+name = "static-next-server-00000000-0000-0000-0000-000000000000"
 version = "0.1.0"
 dependencies = [
  "axum",

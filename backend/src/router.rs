@@ -124,7 +124,7 @@ pub async fn login(
 
             sqlx::query("INSERT INTO sessions (session_id, user_id) VALUES ($1, 1)")
                 .bind(&session_id)
-                .bind(res.get::<i32, _>("user_id"))
+                .bind(res.get::<i32, _>("id"))
                 .execute(&state.postgres)
                 .await
                 .expect("Couldn't insert session :(");
@@ -176,7 +176,7 @@ pub async fn forgot_password(
 
     let credentials = Credentials::new(state.smtp_email, state.smtp_password);
 
-    let message = format!("Hello!\n\n Your new password is: {new_password} \n\n Don't share this with anyone else. \n\n Kind regards, \nJosh");
+    let message = format!("Hello!\n\n Your new password is: {new_password} \n\n Don't share this with anyone else. \n\n Kind regards, \nZest");
 
     let email = Message::builder()
         .from("noreply <joshua.mo.876@gmail.com".parse().unwrap())
@@ -250,15 +250,17 @@ pub async fn view_one_record(Path(id): Path<String>, State(state): State<AppStat
 
 #[derive(Deserialize)]
 pub struct RecordRequest {
-    message: String
+    message: String,
+    owner: String
 }
 
 pub async fn create_record(
     State(state): State<AppState>,
     Json(request): Json<RecordRequest>,
 ) -> Response {
-    let query = sqlx::query("INSERT INTO notes (message) VALUES ($1)")
+    let query = sqlx::query("INSERT INTO notes (message, owner) VALUES ($1, $2)")
         .bind(request.message)
+        .bind("he".to_string())
         .execute(&state.postgres);
 
     match query.await {

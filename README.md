@@ -4,6 +4,11 @@ This is an example of what can be achieved by using [shuttle's](https://www.shut
 
 We will be building a fully working login portal with a dashboard.
 ### Preview
+
+![]("./Screenshot 1.png")
+
+![]("./Screenshot 2.png")
+
 ### Packages/libs used
 * Next: The whole point of this repo.
 * React: The whole point of this repo (Next builds on React, so this is an unspoken pre-requisite).

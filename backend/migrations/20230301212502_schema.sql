@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS notes (
     id SERIAL PRIMARY KEY,
     message VARCHAR NOT NULL,
-    owner VARCHAR,
+    owner VARCHAR NOT NULL,
     createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 );
 
@@ -21,6 +21,5 @@ INSERT INTO notes (message, owner) VALUES ('Hello world!', 'he');
 CREATE TABLE IF NOT EXISTS sessions (
     id SERIAL PRIMARY KEY,
     session_id VARCHAR NOT NULL UNIQUE,
-    user_id INT NOT NULL UNIQUE,
-    user_name VARCHAR NOT NULL UNIQUE
+    user_id INT NOT NULL UNIQUE
 );

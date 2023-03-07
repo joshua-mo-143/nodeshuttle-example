@@ -15,7 +15,7 @@ return (
       </Head>
 <main className="bg-stone-300 w-screen h-screen grid lg:grid-cols-2 lg:grid-rows-1 ">
         <div className="col-span-1 flex flex-col items-center justify-center h-full w-full p-20 bg-stone-500">
-          <div className="flex flex-col items-center justify-center gap-6 bg-sky-200 p-10 rounded-md">  
+          <div className="flex flex-col items-center justify-center gap-10 bg-sky-200 p-10 rounded-md">  
             {children}
                </div>
         </div>
