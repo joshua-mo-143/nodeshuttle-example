@@ -14,7 +14,9 @@ export default function Home() {
   const handleLogout = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
-    const res = await fetch(`http://${window.location.host}/api/auth/logout`);
+   const url = `//${window.location.host}/api/auth/logout`
+
+    const res = await fetch(url);
 
     if (res.ok) {
       router.push("/");
@@ -23,8 +25,11 @@ export default function Home() {
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
+
+   const url = `//${window.location.host}/api/notes/create`
+    
     try {
-    const res = await fetch(`http://${window.location.host}/api/notes/create`, {
+    const res = await fetch(url, {
       mode: 'cors',
       method: 'POST',
       headers: {

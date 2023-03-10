@@ -20,8 +20,8 @@ return (
                </div>
         </div>
         <div className="flex flex-col col-span-1 bg-sky-200 h-full w-full items-center justify-center">
-          <p className="text-5xl">Zest.</p>
-          <p> Your number one source for Rust news.</p>
+          <p className="text-7xl">Zest.</p>
+          <p> Your number one app for storing notes and messages.</p>
           </div>
       </main>
 

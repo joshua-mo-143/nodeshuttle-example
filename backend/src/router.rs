@@ -122,7 +122,7 @@ pub async fn login(
             }
             let session_id = rand::random::<u64>().to_string();
 
-            sqlx::query("INSERT INTO sessions (session_id, user_id) VALUES ($1, 1)")
+            sqlx::query("INSERT INTO sessions (session_id, user_id) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET session_id = EXCLUDED.session_id")
                 .bind(&session_id)
                 .bind(res.get::<i32, _>("id"))
                 .execute(&state.postgres)

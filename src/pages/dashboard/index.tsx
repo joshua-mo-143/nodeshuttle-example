@@ -24,9 +24,12 @@ export default function Home() {
     const element = e.target as HTMLButtonElement;
     const id = element.getAttribute("data-id");
 
+    const url = `//${window.location.host}/api/notes/${id}`
+
+
     try {
       
-const res = await fetch(`http://${window.location.host}/api/notes/${id}`, {
+const res = await fetch(url, {
       mode: 'cors',
       method: 'DELETE'
     });
@@ -43,8 +46,10 @@ const res = await fetch(`http://${window.location.host}/api/notes/${id}`, {
   React.useEffect(() => {
     const fetchData = async () => {
 
+     const url = `//${window.location.host}/api/notes`
+
       try {
-        const res = await fetch(`http://${window.location.host}/api/notes`,
+        const res = await fetch(url,
         {
             method: "GET",
             credentials: "include",

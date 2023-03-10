@@ -20,7 +20,9 @@ export default function AuthedLayout({children}: props) {
   const handleLogout = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
-    const res = await fetch(`http://${window.location.host}/api/auth/logout`);
+    let url = `//${window.location.host}/api/auth/logout`
+
+    const res = await fetch(url);
 
     if (res.ok) {
       router.push("/");

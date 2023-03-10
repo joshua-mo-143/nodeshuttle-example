@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import React from 'react'
+import Link from 'next/link'
 import {useRouter} from 'next/router'
 import GuestLayout from '../components/GuestLayout'
 
@@ -16,8 +17,10 @@ export default function Home() {
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
+  const url = `//${window.location.host}/api/auth/login`
+
     try {
-      await fetch(`http://${window.location.host}/api/auth/login`, 
+      await fetch(url, 
         {
           method: "POST",
           mode: "cors",
@@ -57,9 +60,8 @@ export default function Home() {
             <p id="error" className="w-3/5 h-[2rem]"></p>
             <button type="submit" className="px-8 py-2 bg-stone-100 hover:bg-white transition-all">Submit</button>
            </form>
-
           
-            <button className="px-8 py-2 bg-stone-100 hover:bg-white transition-all">I'm a new user</button>
+            <Link href="/register" className="px-8 py-2 bg-stone-100 hover:bg-white transition-all">I'm a new user</Link>
     </GuestLayout>
   )
 }
