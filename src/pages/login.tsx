@@ -5,6 +5,7 @@ import React from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/router'
 import GuestLayout from '../components/GuestLayout'
+import {accountStore} from '../zustandStore'
 
 export default function Home() {
 
@@ -13,6 +14,8 @@ export default function Home() {
   let [error, setError] = React.useState<string>("");
 
   let router = useRouter()
+
+  const {changeName} = accountStore();
   
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
@@ -32,7 +35,8 @@ export default function Home() {
             password: password
           }),
         })
-
+      
+      changeName(username);
       router.push("/dashboard");
       
     } catch(e: any) {

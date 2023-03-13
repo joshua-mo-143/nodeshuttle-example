@@ -4,12 +4,14 @@ import { Inter } from '@next/font/google'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
+import {accountStore} from '../../zustandStore'
 
 export default function Home() {
 
   let router = useRouter();
 
-  let [message, setMessage] = React.useState<string>("");
+  const [message, setMessage] = React.useState<string>("");
+  const {name} = accountStore();
 
   const handleLogout = async (e: React.SyntheticEvent) => {
     e.preventDefault()
@@ -36,7 +38,8 @@ export default function Home() {
         "Content-Type": "application/json"
       }, 
       body: JSON.stringify({
-        message: message
+        message: message,
+          owner: name
       })
     })
 

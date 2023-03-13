@@ -172,7 +172,7 @@ pub async fn forgot_password(
             .bind(hashed_password)
             .bind(email_recipient.clone())
             .execute(&state.postgres)
-            .await;
+            .await.expect("Had an error resetting password");
 
     let credentials = Credentials::new(state.smtp_email, state.smtp_password);
 
@@ -260,7 +260,7 @@ pub async fn create_record(
 ) -> Response {
     let query = sqlx::query("INSERT INTO notes (message, owner) VALUES ($1, $2)")
         .bind(request.message)
-        .bind("he".to_string())
+        .bind(request.owner)
         .execute(&state.postgres);
 
     match query.await {
@@ -278,9 +278,11 @@ pub async fn edit_record(
     Path(id): Path<i32>,
     Json(request): Json<RecordRequest>,
 ) -> Response {
-    let query = sqlx::query("UPDATE notes SET message = $1 WHERE id = $2")
+    
+    let query = sqlx::query("UPDATE notes SET message = $1 WHERE id = $2 AND owner = $3")
         .bind(request.message)
         .bind(id)
+        .bind(request.owner)
         .execute(&state.postgres);
 
     match query.await {

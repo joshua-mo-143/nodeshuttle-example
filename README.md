@@ -6,7 +6,7 @@ We will be building a fully working login portal with a dashboard.
 
 ### Preview
 
-![](./Screenshot1.png)
+![](./Screenshot3.png)
 
 ![](./Screenshot2.png)
 

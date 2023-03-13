@@ -55,7 +55,7 @@ export default function Home() {
   
   return (
     <GuestLayout>
-                <form onSubmit={(e) => handleSubmit(e)} className="flex flex-col items-center justify-center gap-6 w-max max-w-[40rem] bg-sky-200 px-5 py-5 rounded-md">  
+                <form onSubmit={(e) => handleSubmit(e)} className="flex flex-col items-center justify-center gap-4 w-max max-w-[40rem] bg-sky-200 px-5 py-5 rounded-md">  
               <p className="text-2xl">Register</p>
               <label htmlFor="username" className="flex flex-row items-center gap-4 w-[20rem]">
                 <span>Username:</span>
