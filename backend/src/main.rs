@@ -3,7 +3,6 @@ use axum_extra::extract::cookie::Key;
 use shuttle_secrets::SecretStore;
 use sqlx::PgPool;
 use std::path::PathBuf;
-use sync_wrapper::SyncWrapper;
 
 mod router;
 use router::create_router;
@@ -23,12 +22,12 @@ impl FromRef<AppState> for Key {
     }
 }
 
-#[shuttle_service::main]
+#[shuttle_runtime::main]
 async fn axum(
     #[shuttle_static_folder::StaticFolder] static_folder: PathBuf,
     #[shuttle_shared_db::Postgres] postgres: PgPool,
     #[shuttle_secrets::Secrets] secrets: SecretStore,
-) -> shuttle_service::ShuttleAxum {
+) -> shuttle_axum::ShuttleAxum {
     sqlx::migrate!()
         .run(&postgres)
         .await
@@ -56,6 +55,5 @@ async fn axum(
 
     let router = create_router(static_folder, state);
 
-    let sync_wrapper = SyncWrapper::new(router);
-    Ok(sync_wrapper)
+    Ok(router.into())
 }

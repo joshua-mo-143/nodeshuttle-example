@@ -6,7 +6,7 @@ We will be building a fully working login portal with a dashboard.
 
 ### Preview
 
-![](./Screenshot3.png)
+![](./Screenshot1.png)
 
 ![](./Screenshot2.png)
 
@@ -20,6 +20,8 @@ You can also use binstall for the installation:
 ```
   cargo binstall cargo-shuttle
 ```
+
+Note that this will require protoc due to a recent release change; you can see more about this [here.](https://github.com/shuttle-hq/shuttle/releases/tag/v0.12.0)
 
 Once that's done, all you need to do is to install the dependencies on the root of the project and then log in with shuttle using `npm run shuttle-login`, then you can run this project locally or deploy it!
 

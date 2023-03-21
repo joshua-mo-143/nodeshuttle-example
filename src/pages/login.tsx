@@ -23,7 +23,7 @@ export default function Home() {
   const url = `//${window.location.host}/api/auth/login`
 
     try {
-      await fetch(url, 
+     let res =  await fetch(url, 
         {
           method: "POST",
           mode: "cors",
@@ -36,9 +36,13 @@ export default function Home() {
           }),
         })
       
-      changeName(username);
+      if (res.ok) {
+        
+changeName(username);
       router.push("/dashboard");
-      
+      } else {
+        console.log("Incorrect login details.");
+      }
     } catch(e: any) {
       console.log(`Error: ${e}`)
     }

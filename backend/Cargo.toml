@@ -12,11 +12,12 @@ http = "0.2.9"
 lettre = "0.10.3"
 rand = "0.8.5"
 serde = { version = "1.0.152", features = ["derive"] }
-shuttle-secrets = "0.11.0"
-shuttle-service = { version = "0.11.0", features = ["web-axum"] }
-shuttle-shared-db = { version = "0.11.0", features = ["postgres"] }
-shuttle-static-folder = "0.11.0"
+shuttle-secrets = "0.12.0"
+shuttle-runtime = "0.12.0"
+shuttle-axum = "0.12.0"
+shuttle-shared-db = { version = "0.12.0", features = ["postgres"] }
+shuttle-static-folder = "0.12.0"
 sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "postgres"] }
-sync_wrapper = "0.1.1"
 time = "0.3.20"
 tower-http = { version = "0.4.0", features = ["cors"] }
+tokio = "1.26.0"
